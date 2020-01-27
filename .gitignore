@@ -1,0 +1,11 @@
+.DS_Store
+tmp/
+
+#ruby test coverage
+coverage/
+
+#gemfile.lock
+Gemfile.lock
+
+#generated gem file
+*.gem
