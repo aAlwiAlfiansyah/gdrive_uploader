@@ -34,10 +34,10 @@ class GdriveUploader
 
   def upload_or_update(file_path, file_name, directory_id)
     file_id = get_file_id(directory_id, file_name)
-    if file_id
-      update(file_path, file_name, file_id)
-    else
+    if file_id.empty?
       upload(file_path, file_name, directory_id)
+    else
+      update(file_path, file_name, file_id)
     end
   end
 
