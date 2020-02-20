@@ -46,6 +46,24 @@ class GdriveUploaderTest < Test::Unit::TestCase
     assert @system_runner.running?(expected_command)
   end
 
+  def test_upload_or_update_should_call_upload
+    uploader = GdriveUploader.new(@system_runner)
+    uploader.stubs(:check_file_validity).returns(true)
+    uploader.stubs(:get_file_id).returns(nil)
+
+    uploader.expects(:upload).once
+    uploader.upload_or_update('', '', '')
+  end
+
+  def test_upload_or_update_should_call_update
+    uploader = GdriveUploader.new(@system_runner)
+    uploader.stubs(:check_file_validity).returns(true)
+    uploader.stubs(:get_file_id).returns('some_id')
+
+    uploader.expects(:update).once
+    uploader.upload_or_update('', '', '')
+  end
+
   def test_check_file_validity
     assert_raises do
       GdriveUploader.new(@system_runner).check_file_validity('some_random_file.txt')
