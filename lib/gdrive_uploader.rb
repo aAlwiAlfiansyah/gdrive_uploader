@@ -39,4 +39,12 @@ class GdriveUploader
     file_id = @system_runner.run_with_output command
     file_id
   end
+
+  def download(file_path: '.', file_name:, directory_id: 'root')
+    file_id = get_file_id(directory_id, file_name)
+    abort "#{file_name} not found in directory id #{directory_id}" unless file_id
+
+    command = "gdrive download -f -r --path \"#{file_path}\" \"#{file_id}\""
+    @system_runner.run command
+  end
 end

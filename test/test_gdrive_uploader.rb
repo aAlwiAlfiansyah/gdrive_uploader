@@ -48,4 +48,17 @@ class GdriveUploaderTest < Test::Unit::TestCase
       GdriveUploader.new(@system_runner).check_file_validity('some_random_file.txt')
     end
   end
+
+  def test_download
+    file_path = 'somepath'
+    file_name = 'somename'
+    file_id = 'some_id'
+    uploader = GdriveUploader.new(@system_runner)
+    uploader.stubs(:get_file_id).returns(file_id)
+    uploader.download(file_path: file_path,
+                      file_name: file_name,
+                      directory_id: 'dir_id')
+    expected_command = "gdrive download -f -r --path \"#{file_path}\" \"#{file_id}\""
+    assert @system_runner.running?(expected_command)
+  end
 end
