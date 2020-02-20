@@ -23,20 +23,23 @@ class GdriveUploaderTest < Test::Unit::TestCase
   end
 
   def test_update
-    file_name = 'Gemfile'
+    file_name = 'random_file'
     random_id = 'random_id'
 
-    GdriveUploader.new(@system_runner).update(file_name, file_name, random_id)
-
+    uploader = GdriveUploader.new(@system_runner)
+    uploader.stubs(:check_file_validity).returns(true)
+    uploader.update(file_name, file_name, random_id)
     expected_command = "gdrive update --name \"#{file_name}\" \"#{random_id}\" \"#{file_name}\""
     assert @system_runner.running?(expected_command)
   end
 
   def test_upload
-    file_name = 'Gemfile'
+    file_name = 'random_file'
     random_id = 'random_id'
 
-    GdriveUploader.new(@system_runner).upload(file_name, file_name, random_id)
+    uploader = GdriveUploader.new(@system_runner)
+    uploader.stubs(:check_file_validity).returns(true)
+    uploader.upload(file_name, file_name, random_id)
 
     expected_command = "gdrive upload --share -p \"#{random_id}\" --name \"#{file_name}\" \"#{file_name}\""
     expected_command += " |  grep -i https | cut -d' ' -f7"
