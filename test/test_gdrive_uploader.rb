@@ -39,10 +39,12 @@ class GdriveUploaderTest < Test::Unit::TestCase
 
     uploader = GdriveUploader.new(@system_runner)
     uploader.stubs(:check_file_validity).returns(true)
+    uploader.expects(:share_file).once
+    uploader.expects(:get_share_link).once
     uploader.upload(file_name, file_name, random_id)
 
-    expected_command = "gdrive upload --share -p \"#{random_id}\" --name \"#{file_name}\" \"#{file_name}\""
-    expected_command += " |  grep -i https | cut -d' ' -f7"
+    expected_command = "gdrive upload -p \"#{random_id}\""
+    expected_command += " --name \"#{file_name}\" \"#{file_name}\""
     assert @system_runner.running?(expected_command)
   end
 
@@ -81,5 +83,37 @@ class GdriveUploaderTest < Test::Unit::TestCase
                       directory_id: 'dir_id')
     expected_command = "gdrive download -f -r --path \"#{file_path}\" \"#{file_id}\""
     assert @system_runner.running?(expected_command)
+  end
+
+  def test_share_file
+    directory_id = 'some_dir_id'
+    file_name = 'somename'
+    file_id = 'some_id'
+    domain = 'some_domain'
+    uploader = GdriveUploader.new(@system_runner)
+    uploader.stubs(:get_file_id).returns(file_id)
+    uploader.share_file(directory_id, file_name, domain)
+
+    expected_command = 'gdrive share'
+    expected_command += " --type domain --domain \"#{domain}\""
+    expected_command += " \"#{file_id}\""
+
+    assert @system_runner.running?(expected_command)
+  end
+
+  def test_get_share_link_correct_link
+    file_id = 'somerandomthings'
+    uploader = GdriveUploader.new(@system_runner)
+    expected = "https://drive.google.com/file/d/#{file_id}/view?usp=sharing"
+    actual = uploader.get_share_link(file_id)
+    assert_equal expected, actual
+  end
+
+  def test_get_share_link_empty_link
+    file_id = ''
+    uploader = GdriveUploader.new(@system_runner)
+    expected = ''
+    actual = uploader.get_share_link(file_id)
+    assert_equal expected, actual
   end
 end

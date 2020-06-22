@@ -14,13 +14,16 @@ class GdriveUploader
     abort("Can't find file at #{file_path}") unless File.exist?(file_path)
   end
 
-  def upload(file_path, file_name, directory_id)
+  def upload(file_path, file_name, directory_id, domain = '')
     check_file_validity(file_path)
 
-    # p "uploading file #{file_path} with file_name #{file_name}"
-    command = "gdrive upload --share -p \"#{directory_id}\" --name \"#{file_name}\" \"#{file_path}\""
-    command += " |  grep -i https | cut -d' ' -f7"
-    share_link = @system_runner.run_with_output command
+    # p "uploading file #{file_path} with filename #{file_name}"
+    upload_command = "gdrive upload -p \"#{directory_id}\""
+    upload_command += " --name \"#{file_name}\" \"#{file_path}\""
+    @system_runner.run_with_output upload_command
+
+    file_id = share_file(directory_id, file_name, domain)
+    share_link = get_share_link(file_id)
     share_link
   end
 
@@ -32,10 +35,10 @@ class GdriveUploader
     @system_runner.run command
   end
 
-  def upload_or_update(file_path, file_name, directory_id)
+  def upload_or_update(file_path, file_name, directory_id, domain = '')
     file_id = get_file_id(directory_id, file_name)
     if file_id.empty?
-      upload(file_path, file_name, directory_id)
+      upload(file_path, file_name, directory_id, domain)
     else
       update(file_path, file_name, file_id)
     end
@@ -55,5 +58,26 @@ class GdriveUploader
 
     command = "gdrive download -f -r --path \"#{file_path}\" \"#{file_id}\""
     @system_runner.run command
+  end
+
+  def share_file(directory_id, file_name, domain = '')
+    file_id = get_file_id(directory_id, file_name)
+    unless file_id.to_s.empty?
+      share_command = 'gdrive share'
+      unless domain.to_s.empty?
+        share_command += " --type domain --domain \"#{domain}\""
+      end
+      share_command += " \"#{file_id}\""
+      @system_runner.run_with_output share_command
+    end
+    file_id
+  end
+
+  def get_share_link(file_id)
+    share_link = ''
+    unless file_id.to_s.empty?
+      share_link = "https://drive.google.com/file/d/#{file_id}/view?usp=sharing"
+    end
+    share_link
   end
 end

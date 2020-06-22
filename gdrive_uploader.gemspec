@@ -2,8 +2,8 @@
 
 Gem::Specification.new do |s|
   s.name = 'gdrive_uploader'
-  s.version = '0.0.2'
-  s.date = '2020-02-20'
+  s.version = '0.0.3'
+  s.date = '2020-06-22'
   s.files = [
     'lib/gdrive_uploader.rb',
     'lib/gdrive_uploader/system_runner.rb'
